@@ -1,0 +1,47 @@
+version: '3.6'
+
+services:
+   artemis:
+      image: vromero/activemq-artemis:2.4.0-alpine
+      ports:
+         - 61616:61616
+         - 8161:8161
+      environment:
+         - ARTEMIS_USERNAME=avelon
+         - ARTEMIS_PASSWORD=bluechip
+      hostname: artemis
+      container_name: artemis
+      networks:
+         - artemis-test
+   producer:
+      build: 
+         context: producer
+         args:
+           jar: build/libs/producer.jar
+           port: 8081
+      image: producer
+      ports:
+         - 8081:8081
+      hostname: producer
+      container_name: producer
+      networks:
+         - artemis-test
+      depends_on:
+         - artemis
+   consumer:
+      build: 
+        context: consumer
+        args: 
+          jar: build/libs/consumer.jar
+          port: 8082
+      image: consumer
+      ports:
+         - 8082:8082
+      hostname: consumer
+      container_name: consumer
+      networks:
+         - artemis-test
+      depends_on:
+         - artemis
+networks:
+  artemis-test:
